@@ -5,17 +5,18 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Set;
 
+/**
+ * 持续输入金额
+ * 定时账户余额
+ */
 public class ReadAmount {
     //记录当前账户余额
     private static HashMap<String , BigDecimal> balanceHash = new HashMap<String , BigDecimal>();
     //线程输出结束标志
     private static boolean STOP =false;
     //输出固定时间
-    private static final long sleepTime =20*1000;
-
-
+    private static final long sleepTime =60*1000;
 
     //入口函数
     public static void main(String[] args) {
@@ -23,7 +24,7 @@ public class ReadAmount {
     byte[] b = new byte[1024];
     //有效数据个数
     int n = 0;
-
+    //开始输出线程
    startThread();
     try{
         while(true){
@@ -65,6 +66,7 @@ public class ReadAmount {
         }
     }
 
+    //检查金额是否合法
     private static boolean isAmount(String str){
         java.util.regex.Pattern pattern=java.util.regex.Pattern.compile("^(([-,1-9]{1}\\d*)|([0]{1}))(\\.(\\d){0,2})?$"); // 判断小数点后2位的数字的正则表达式
         java.util.regex.Matcher match=pattern.matcher(str);
@@ -77,9 +79,9 @@ public class ReadAmount {
         }
     }
 
+    //检查币种是否合法
     private static boolean isCurrency(String currency){
-
-
+        //TODO
         return true;
     }
 

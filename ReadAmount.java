@@ -1,5 +1,9 @@
 package test.HSBC;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -24,12 +28,21 @@ public class ReadAmount {
     byte[] b = new byte[1024];
     //有效数据个数
     int n = 0;
+
+    //判断是否有初始化数据
+    if(args.length<2){
+        String fileName = args[0];
+        //启动文件数据
+        readFile(fileName);
+    }
+
     //开始输出线程
    startThread();
+
     try{
         while(true){
             //提示信息
-            System.out.println("Please input the money[RMB 100]：");
+            System.out.println("Please input the money format[RMB 100]：");
             //读取数据
             n = System.in.read(b);
             //转换为字符串
@@ -60,6 +73,8 @@ public class ReadAmount {
           //  System.out.println("输入内容为：" +currency +"'"+amount);
             if (isAmount(amount) && isCurrency(currency) ){
                 updateBalance(currency,amount);
+            }else{
+                System.out.println("币种或者金额不合法，请检查");
             }
         }else{
             System.out.println("输入格式不合法");
@@ -81,6 +96,17 @@ public class ReadAmount {
 
     //检查币种是否合法
     private static boolean isCurrency(String currency){
+        if(currency.length()!=3){
+            return false;
+        }
+
+        java.util.regex.Pattern pattern=java.util.regex.Pattern.compile("[a-zA-Z]+"); // 判断小数点后2位的数字的正则表达式
+        java.util.regex.Matcher match=pattern.matcher(currency.toUpperCase());
+        if(match.matches()==false)
+        {
+            return false;
+        }
+
         //TODO
         return true;
     }
@@ -88,19 +114,20 @@ public class ReadAmount {
 
     //更新金额
     private static void  updateBalance(String key,String value){
-        if (balanceHash.get(key)==null){
-            BigDecimal bdAmount =new BigDecimal(value);
-            balanceHash.put(key,bdAmount);
-        }else{
-            BigDecimal bdBalance = balanceHash.get(key);
-            bdBalance = bdBalance.add(new BigDecimal(value));
-            if(bdBalance.equals(0.00)){
-                balanceHash.remove(key);
+        synchronized(balanceHash) {
+            if (balanceHash.get(key)==null){
+                BigDecimal bdAmount =new BigDecimal(value);
+                balanceHash.put(key,bdAmount);
             }else{
-                //更新金额
-                balanceHash.put(key,bdBalance );
+                BigDecimal bdBalance = balanceHash.get(key);
+                bdBalance = bdBalance.add(new BigDecimal(value));
+                if(bdBalance.equals(0.00)){
+                    balanceHash.remove(key);
+                }else{
+                    //更新金额
+                    balanceHash.put(key,bdBalance );
+                }
             }
-
         }
     }
 
@@ -150,5 +177,27 @@ public class ReadAmount {
         return sbf.format(d);
     }
 
+    //读取文件内容
+    private static void readFile(String filePath){
+        try {
+            File file=new File(filePath);
+            if(file.isFile() && file.exists()){ //判断文件是否存在
+                InputStreamReader read = new InputStreamReader(new FileInputStream(file));
+                BufferedReader bufferedReader = new BufferedReader(read);
+                String lineTxt = null;
+                while((lineTxt = bufferedReader.readLine()) != null){
+                    //添加到当前金额数据当中
+                    checkInput(lineTxt);
+                }
+                read.close();
+            }else{
+                System.out.println("找不到指定的文件");
+            }
+
+        } catch (Exception e) {
+            System.out.println("读取文件内容出错");
+            e.printStackTrace();
+        }
+    }
 
 }

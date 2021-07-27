@@ -30,7 +30,7 @@ public class ReadAmount {
     int n = 0;
 
     //判断是否有初始化数据
-    if(args.length<2){
+    if(args!=null&&args.length>0){
         String fileName = args[0];
         //启动文件数据
         readFile(fileName);

@@ -9,14 +9,16 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 持续输入金额
- * 定时账户余额
+ * 根据文件加载或者窗口输入“币种 金额”命令；每分钟显示余额
+ *
+ * @author xiexianjin
  */
 public class ReadAmount {
     //记录当前账户余额
-    private static HashMap<String , BigDecimal> balanceHash = new HashMap<String , BigDecimal>();
+    private static ConcurrentHashMap<String , BigDecimal> balanceHash = new ConcurrentHashMap<String , BigDecimal>();
     //线程输出结束标志
     private static boolean STOP =false;
     //输出固定时间
